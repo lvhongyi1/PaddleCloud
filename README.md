@@ -56,7 +56,7 @@ PaddleCloud能够帮助您一键发起深度学习任务，为您提供免费底
 - 飞桨官方技术交流群(QQ群号:1139713364)
 
 
-<img class="paddle-footer-qr-context-img" alt="paddle weixin qr" src="./resources/qq.PNG" width="140" height="140">
+<img class="paddle-footer-qr-context-img" alt="paddle weixin qr" src="./resources/qq.PNG" width="130" height="140">
 
 - 飞桨微信公众号
 
