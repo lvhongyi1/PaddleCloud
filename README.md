@@ -58,7 +58,3 @@ PaddleCloud能够帮助您一键发起深度学习任务，为您提供免费底
 
 <img class="paddle-footer-qr-context-img" alt="paddle weixin qr" src="./resources/qq.PNG" width="130" height="140">
 
-- 飞桨微信公众号
-
-
-<img class="paddle-footer-qr-context-img" alt="paddle weixin qr" src="https://paddlepaddle-org-cn.cdn.bcebos.com/paddle-site-front/static/media/paddlepaddleQr.7da963abe002e36f858f31d824a2d7a4.jpg" width="140" height="140">
