@@ -1,60 +1,250 @@
-# PaddleCloud
-PaddleCloud能够帮助您一键发起深度学习任务，为您提供免费底层计算资源、或提供快速打通云上计算资源通道，支持您快速发起单机/分布式Paddle框架训练任务，致力于推动AI应用更广泛地落地。
-
-## Tutorials
-
-- [PaddlePaddle官网](https://www.paddlepaddle.org.cn)
-- [快速开始](./doc/tutorial_cn.md)
-- [使用手册](./doc/usage_cn.md)
-- [示例](./example)
-
-## How To
-- **免费使用**
-
-
-   目前的免费策略，每位用户每天任务总运行时长不得超过100分钟，同时运行中的任务不能超过2个，每个任务运行时间限定不超过30分钟（将根据用户使用情况灵活调整）
-
-
-   使用步骤：
- 
- 
-   1）下载PaddleCloud命令行工具（目前仅支持命令行工具）
- 
- 
-   2）填入企业或个人邮箱，申请token，等待邮件通知
- 
- 
-   3）将邮件中的token填入客户端配置文件
- 
- 
-   4）开始提交训练任务
+/// <summary>  
+/// Distance transform for binary image.  
+/// </summary>  
+/// <param name="src">The source image.</param>  
+/// <param name="distanceMode">One parameter to choose the mode of distance transform from 1 to 3, 1 means Euclidean Distance, 2 means CityBlock Distance, 3 means ChessBoard Distance.</param>  
+/// <returns>The result image.</returns>  
+public Bitmap DistanceTransformer(Bitmap src, int distanceMode)  
+{  
+    int w = src.Width;  
+    int h = src.Height;  
+    double p0 = 0, p1 = 0, p2 = 0, p3 = 0, p4 = 0, p5 = 0, p6 = 0, p7 = 0, p8 = 0, min = 0;  
+    int mMax = 0, mMin = 255;  
+    System.Drawing.Imaging.BitmapData srcData = src.LockBits(new Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);  
+    unsafe  
+    {  
+        byte* p = (byte*)srcData.Scan0.ToPointer();  
+        int stride = srcData.Stride;  
+        byte* pTemp;  
+        for (int y = 0; y < h; y++)  
+        {  
+            for (int x = 0; x < w; x++)  
+            {  
+                if (x > 0 && x < w - 1 && y > 0 && y < h - 1)  
+                {  
+                    p0 = (p + x * 3 + y * stride)[0];  
+                    if (p0 != 0)  
+                    {  
+                        pTemp = p + (x - 1) * 3 + (y - 1) * stride;  
+                        p2 = pTemp[0] + GetDistance(x, y, x - 1, y - 1, distanceMode);  
+                        pTemp = p + x * 3 + (y - 1) * stride;  
+                        p3 = pTemp[0] + GetDistance(x, y, x, y - 1, distanceMode);  
+                        pTemp = p + (x + 1) * 3 + (y - 1) * stride;  
+                        p4 = pTemp[0] + GetDistance(x, y, x + 1, y - 1, distanceMode);  
+                        pTemp = p + (x - 1) * 3 + y * stride;  
+                        p1 = pTemp[0] + GetDistance(x, y, x - 1, y, distanceMode);  
+                        min = GetMin(p0, p1, p2, p3, p4);  
+                        pTemp = p + x * 3 + y * stride;  
+                        pTemp[0] = (byte)Math.Min(min, 255);  
+                        pTemp[1] = (byte)Math.Min(min, 255);  
+                        pTemp[2] = (byte)Math.Min(min, 255);  
+                    }  
+                }  
+                else  
+                {  
+                    pTemp = p + x * 3 + y * stride;  
+                    pTemp[0] = 0;  
+                    pTemp[1] = 0;  
+                    pTemp[2] = 0;  
+                }  
   
-
-- **付费使用**
-
-
-  支持使用百度云付费GPU（付费BCC GPU虚拟机）按需跑训练任务，仅在任务运行过程中收取BCC GPU虚拟机费用，任务运行完自动结束计费 
-
-
-  使用步骤：
-
-
-  1）注册百度云账号并实名认证，在账号中提前充入部分资金
-
-
-  2）下载PaddleCloud命令行工具（目前仅支持命令行工具）
-
-
-  3）配置百度云账号ak/sk
-
-
-  4）开始提交训练任务
-
-
-## 联系我们
-
-- 官方技术交流群(QQ群号:1139713364)
-
-
-<img class="paddle-footer-qr-context-img" alt="paddle weixin qr" src="./resources/qq.PNG" width="130" height="140">
-
+            }  
+  
+        }  
+        for (int y = h - 1; y > 0; y--)  
+        {  
+            for (int x = w - 1; x > 0; x--)  
+            {  
+                if (x > 0 && x < w - 1 && y > 0 && y < h - 1)  
+                {  
+                    p0 = (p + x * 3 + y * stride)[0];  
+                    if (p0 != 0)  
+                    {  
+                        pTemp = p + (x + 1) * 3 + y * stride;  
+                        p5 = pTemp[0] + GetDistance(x, y, x + 1, y, distanceMode);  
+                        pTemp = p + (x + 1) * 3 + (y + 1) * stride;  
+                        p6 = pTemp[0] + GetDistance(x, y, x + 1, y + 1, distanceMode);  
+                        pTemp = p + x * 3 + (y + 1) * stride;  
+                        p7 = pTemp[0] + GetDistance(x, y, x, y + 1, distanceMode);  
+                        pTemp = p + (x - 1) * 3 + (y + 1) * stride;  
+                        p8 = pTemp[0] + GetDistance(x, y, x - 1, y + 1, distanceMode);  
+                        min = GetMin(p0, p5, p6, p7, p8);  
+                        pTemp = p + x * 3 + y * stride;  
+                        pTemp[0] = (byte)Math.Min(min, 255);  
+                        pTemp[1] = (byte)Math.Min(min, 255);  
+                        pTemp[2] = (byte)Math.Min(min, 255);  
+                        mMax = (int)Math.Max(min, mMax);  
+                    }  
+                }  
+                else  
+                {  
+                    pTemp = p + x * 3 + y * stride;  
+                    pTemp[0] = 0;  
+                    pTemp[1] = 0;  
+                    pTemp[2] = 0;  
+                }  
+  
+            }  
+  
+        }  
+        mMin = 0;  
+        for (int y = 0; y < h; y++)  
+        {  
+            for (int x = 0; x < w; x++)  
+            {  
+                pTemp = p + x * 3 + y * stride;  
+                if (pTemp[0] != 0)  
+                {  
+                    int temp = pTemp[0];  
+                    pTemp[0] = (byte)((temp - mMin) * 255 / (mMax - mMin));  
+                    pTemp[1] = (byte)((temp - mMin) * 255 / (mMax - mMin));  
+                    pTemp[2] = (byte)((temp - mMin) * 255 / (mMax - mMin));  
+                }  
+            }  
+  
+        }  
+        src.UnlockBits(srcData);  
+        return src;  
+    }  
+}  
+/// <summary>  
+/// Chamfer distance transform(using two 3*3 windows:forward window434 300 000;backward window 000 003 434).  
+/// </summary>  
+/// <param name="src">The source image.</param>  
+/// <returns>The result image.</returns>  
+public Bitmap ChamferDistancetransfrom(Bitmap src)  
+{  
+    int w = src.Width;  
+    int h = src.Height;  
+    double p0 = 0, p1 = 0, p2 = 0, p3 = 0, p4 = 0, p5 = 0, p6 = 0, p7 = 0, p8 = 0, min = 0;  
+    int mMax = 0, mMin = 255;  
+    System.Drawing.Imaging.BitmapData srcData = src.LockBits(new Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);  
+    unsafe  
+    {  
+        byte* p = (byte*)srcData.Scan0.ToPointer();  
+        int stride = srcData.Stride;  
+        byte* pTemp;  
+        for (int y = 0; y < h; y++)  
+        {  
+            for (int x = 0; x < w; x++)  
+            {  
+                if (x > 0 && x < w - 1 && y > 0 && y < h - 1)  
+                {  
+                    p0 = (p + x * 3 + y * stride)[0];  
+                    if (p0 != 0)  
+                    {  
+                        pTemp = p + (x - 1) * 3 + (y - 1) * stride;  
+                        p2 = pTemp[0] + 4;  
+                        pTemp = p + x * 3 + (y - 1) * stride;  
+                        p3 = pTemp[0] + 3;  
+                        pTemp = p + (x + 1) * 3 + (y - 1) * stride;  
+                        p4 = pTemp[0] + 4;  
+                        pTemp = p + (x - 1) * 3 + y * stride;  
+                        p1 = pTemp[0] + 3;  
+                        min = GetMin(p0, p1, p2, p3, p4);  
+                        pTemp = p + x * 3 + y * stride;  
+                        pTemp[0] = (byte)Math.Min(min, 255);  
+                        pTemp[1] = (byte)Math.Min(min, 255);  
+                        pTemp[2] = (byte)Math.Min(min, 255);  
+                    }  
+                }  
+                else  
+                {  
+                    pTemp = p + x * 3 + y * stride;  
+                    pTemp[0] = 0;  
+                    pTemp[1] = 0;  
+                    pTemp[2] = 0;  
+                }  
+  
+            }  
+  
+        }  
+        for (int y = h - 1; y > 0; y--)  
+        {  
+            for (int x = w - 1; x > 0; x--)  
+            {  
+                if (x > 0 && x < w - 1 && y > 0 && y < h - 1)  
+                {  
+                    p0 = (p + x * 3 + y * stride)[0];  
+                    if (p0 != 0)  
+                    {  
+                        pTemp = p + (x + 1) * 3 + y * stride;  
+                        p5 = pTemp[0] + 3;  
+                        pTemp = p + (x + 1) * 3 + (y + 1) * stride;  
+                        p6 = pTemp[0] + 4;  
+                        pTemp = p + x * 3 + (y + 1) * stride;  
+                        p7 = pTemp[0] + 3;  
+                        pTemp = p + (x - 1) * 3 + (y + 1) * stride;  
+                        p8 = pTemp[0] + 4;  
+                        min = GetMin(p0, p5, p6, p7, p8);  
+                        pTemp = p + x * 3 + y * stride;  
+                        pTemp[0] = (byte)Math.Min(min, 255);  
+                        pTemp[1] = (byte)Math.Min(min, 255);  
+                        pTemp[2] = (byte)Math.Min(min, 255);  
+                        mMax = (int)Math.Max(min, mMax);  
+                    }  
+                }  
+                else  
+                {  
+                    pTemp = p + x * 3 + y * stride;  
+                    pTemp[0] = 0;  
+                    pTemp[1] = 0;  
+                    pTemp[2] = 0;  
+                }  
+  
+            }  
+  
+        }  
+        mMin = 0;  
+        for (int y = 0; y < h; y++)  
+        {  
+            for (int x = 0; x < w; x++)  
+            {  
+                pTemp = p + x * 3 + y * stride;  
+                if (pTemp[0] != 0)  
+                {  
+                    int temp = pTemp[0];  
+                    pTemp[0] = (byte)((temp - mMin) * 255 / (mMax - mMin));  
+                    pTemp[1] = (byte)((temp - mMin) * 255 / (mMax - mMin));  
+                    pTemp[2] = (byte)((temp - mMin) * 255 / (mMax - mMin));  
+                }  
+            }  
+  
+        }  
+        src.UnlockBits(srcData);  
+        return src;  
+    }  
+}  
+private double GetDistance(int x, int y, int dx, int dy, int mode)  
+{  
+    double result = 0;  
+    switch (mode)  
+    {  
+        case 1:  
+            result = EuclideanDistance(x, y, dx, dy);  
+            break;  
+        case 2:  
+            result = CityblockDistance(x, y, dx, dy);  
+            break;  
+        case 3:  
+            result = ChessboardDistance(x, y, dx, dy);  
+            break;  
+    }  
+    return result;  
+}  
+private double EuclideanDistance(int x, int y, int dx, int dy)  
+{  
+    return Math.Sqrt((x - dx) * (x - dx) + (y - dy) * (y - dy));  
+}  
+private double CityblockDistance(int x, int y, int dx, int dy)  
+{  
+    return Math.Abs(x - dx) + Math.Abs(y - dy);  
+}  
+private double ChessboardDistance(int x, int y, int dx, int dy)  
+{  
+    return Math.Max(Math.Abs(x - dx), Math.Abs(y - dy));  
+}  
+private double GetMin(double a, double b, double c, double d, double e)  
+{  
+    return Math.Min(Math.Min(Math.Min(a, b), Math.Min(c, d)), e);  
+}  
